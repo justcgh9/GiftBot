@@ -43,7 +43,6 @@ def age_group(message, *args):
 
 # Occasion selection handler
 def occasion(message, *args):
-    print(args)
     args_new = list(args).append(message.text)
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     reply_markup.add('Cost: Ascending', 'Cost: Descending')
