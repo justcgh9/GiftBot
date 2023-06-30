@@ -1,3 +1,4 @@
+from flask import Flask, request
 import sqlite3
 import telebot
 from telebot import types
@@ -17,7 +18,7 @@ bot = telebot.TeleBot('5897120145:AAEgh8bZr72solVQt3p405rUQod9Bz1-HWs')
 @bot.message_handler(commands=['start'])
 def start(message):
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('Male', 'Female', 'Other')
+    reply_markup.add('👩 Female', '👨 Male', 'Other')
     bot.send_message(message.chat.id, 'Welcome to the Present Bot! Please select the gender:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, gender)
 
@@ -26,7 +27,7 @@ def start(message):
 def gender(message):
     args = [message.text]
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('0-12', '12-18', '18-27', '27-45', '45+')
+    reply_markup.add('0-7', '7-12', '12-18', '18-27', '27-45', '45+')
     bot.send_message(message.chat.id, 'Please select the age group:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, age_group, args)
 
