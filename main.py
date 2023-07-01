@@ -27,7 +27,7 @@ def start(message):
 def gender(message):
     args = [message.text]
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('0-7', '7-12', '12-18', '18-27', '27-45', '45+')
+    reply_markup.add('👶 0-7', '🧒 7-12', '👧👦 12-18', '🧑 18-27', '👩👨 27-45', '🧓 45+')
     bot.send_message(message.chat.id, 'Please select the age group:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, age_group, args)
 
@@ -36,7 +36,7 @@ def gender(message):
 def age_group(message, *args):
     args[0].append(message.text)
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('Birthday', 'Anniversary', 'Christmas', 'Other')
+    reply_markup.add('🎂 Birthday', '🎄🎅 Christmas', '💍❤ Anniversary', "💐 Women's day", '🎖 Defender on the Fatherland day', '🥂 Other')
     bot.send_message(message.chat.id, 'Please select the occasion:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, occasion, args)
 
@@ -45,7 +45,7 @@ def age_group(message, *args):
 def occasion(message, *args):
     args[0][0].append(message.text)
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('Cost: Ascending', 'Cost: Descending')
+    reply_markup.add('Cost: Ascending⬆', 'Cost: Descending⬇')
     bot.send_message(message.chat.id, 'Please select the sorting order:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, present_options, args)
 
