@@ -9,15 +9,6 @@ WELCOME_MESSAGE = u'Welcome to the Present Bot!\nThis bot will assist you to cho
                   u'To abort use command - /cancel'
 
 
-# Start command handler
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.send_message(message.chat.id, WELCOME_MESSAGE)
-
-
-# GPT-3.5 model parameters
-MODEL_NAME = 'text-davinci-003'
-
 # Initial prompt to fine-tune GPT
 INITIAL_PROMPT = """You are a gift assistant bot. I can help you choose a gift for someone.
 Please provide me with the following information:
@@ -34,6 +25,16 @@ For example:
 
 Once I have the information, I will generate some gift recommendations for you.
 """
+
+
+# Start command handler
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, INITIAL_PROMPT)
+
+
+# GPT-3.5 model parameters
+MODEL_NAME = 'text-davinci-003'
 
 
 # Generate gift recommendations using OpenAI GPT-3.5
