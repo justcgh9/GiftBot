@@ -1,4 +1,3 @@
-from flask import Flask, request
 import sqlite3
 import telebot
 from telebot import types
@@ -25,7 +24,7 @@ def start(message):
 
 # Gender selection handler
 def gender(message):
-    args = [message.text]
+    args = [(message.text).split()[1]]
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     reply_markup.add('👶 0-7', '🧒 7-12', '👧👦 12-18', '🧑 18-27', '👩👨 27-45', '🧓 45+')
     bot.send_message(message.chat.id, 'Please select the age group:', reply_markup=reply_markup)
@@ -34,7 +33,7 @@ def gender(message):
 
 # Age group selection handler
 def age_group(message, *args):
-    args[0].append(message.text)
+    args[0].append((message.text).split()[1])
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     reply_markup.add('🎂 Birthday', '🎄🎅 Christmas', '💍❤ Anniversary', "💐 Women's day", '🎖 Defender on the Fatherland day', '🥂 Other')
     bot.send_message(message.chat.id, 'Please select the occasion:', reply_markup=reply_markup)
@@ -43,7 +42,7 @@ def age_group(message, *args):
 
 # Occasion selection handler
 def occasion(message, *args):
-    args[0][0].append(message.text)
+    args[0][0].append((message.text).split()[1])
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     reply_markup.add('Cost: Ascending⬆', 'Cost: Descending⬇')
     bot.send_message(message.chat.id, 'Please select the sorting order:', reply_markup=reply_markup)
@@ -54,7 +53,7 @@ def occasion(message, *args):
 def present_options(message, *args):
     conn = sqlite3.connect('presents.db')
     cursor = conn.cursor()
-    sort_order = message.text
+    sort_order = message.text[:-1]
     # Fetch present options from the database based on user selections
     query = "SELECT * FROM presents WHERE gender=? AND age_group=? AND occasion=?"
     params = (args[0][0][0][0], args[0][0][0][1], args[0][0][0][2])
@@ -93,7 +92,6 @@ def main():
     )''')
 
     conn.commit()
-
     bot.polling()
 
 
