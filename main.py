@@ -35,7 +35,7 @@ def gender(message):
 def age_group(message, *args):
     args[0].append((message.text).split()[1])
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('🎂 Birthday', '🎄🎅 Christmas', '💍❤ Anniversary', "💐 Women's day", '🎖 Defender on the Fatherland day', '🥂 Other')
+    reply_markup.add('🎂 Birthday', '🎄🎅 Christmas', '❤ Anniversary', '💍 Wedding' "💐 Women's day", '🎖 Defender on the Fatherland day', '🥂 Other')
     bot.send_message(message.chat.id, 'Please select the occasion:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, occasion, args)
 
