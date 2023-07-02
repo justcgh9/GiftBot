@@ -12,9 +12,11 @@ GENDER, AGE_GROUP, OCCASION, SORT = range(4)
 # Bot initialization
 bot = telebot.TeleBot('5897120145:AAEgh8bZr72solVQt3p405rUQod9Bz1-HWs')
 
-WELCOME_MESSAGE = u'Welcome to the Present Bot!\nThis bot will assist you to chose a present\n' \
-                  u'To start use command - /gift\n' \
-                  u'To abort use command - /cancel'
+WELCOME_MESSAGE = u'Welcome to the Gift Assistant Bot! 🎁\nThis bot will help you to choose a present for your ' \
+                  u'relatives and friends. Based on person characteristics, such as age, gender, interests, ' \
+                  u'and occasion information it will select the most appropriate gift options.\n' \ 
+                  u'✔ To start, use command - /gift\n' \
+                  u'✖ To interrupt, use the command - /cancel'
 
 
 MISTAKE_MESSAGE = u'error 404, start again\n'\
