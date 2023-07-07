@@ -1,28 +1,14 @@
 import sqlite3
+from cfg import WELCOME_MESSAGE, MISTAKE_MESSAGE, BOT_TOKEN, CANCEL_MESSAGE
 import telebot
 from telebot import types
-# This is my program
-# Database connection
+
 conn = sqlite3.connect('presents.db')
 cursor = conn.cursor()
 
-# Constants for conversation states
-GENDER, AGE_GROUP, OCCASION, SORT = range(4)
-
-# Bot initialization
-bot = telebot.TeleBot('5897120145:AAEgh8bZr72solVQt3p405rUQod9Bz1-HWs')
-
-WELCOME_MESSAGE = u'Welcome to the Present Bot!\nThis bot will assist you to chose a present\n' \
-                  u'To start use command - /gift\n' \
-                  u'To abort use command - /cancel'
+bot = telebot.TeleBot(BOT_TOKEN)
 
 
-MISTAKE_MESSAGE = u'error 404, start again\n'\
-                  u'To start use command - /gift\n' \
-                  u'To abort use command - /cancel'
-
-
-# Start command handler
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, WELCOME_MESSAGE)
@@ -41,13 +27,12 @@ def gift(message):
     bot.register_next_step_handler(message, gender)
 
 
-# Gender selection handler
 def gender(message):
     if message.text == '/cancel':
         cancel(message)
     else:
         try:
-            args = [(message.text).split()[1]]
+            args = [message.text.split()[1]]
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.add('👶 0-7', '🧒 7-12', '👧👦 12-18', '🧑 18-27', '👩👨 27-45', '🧓 45+')
             bot.send_message(message.chat.id, 'Please select the age group:', reply_markup=reply_markup)
@@ -62,7 +47,7 @@ def age_group(message, *args):
         cancel(message)
     else:
         try:
-            args[0].append((message.text).split()[1])
+            args[0].append(message.text.split()[1])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
             reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
@@ -79,9 +64,9 @@ def occasion(message, *args):
         cancel(message)
     else:
         try:
-            args[0][0].append((message.text).split()[1])
+            args[0][0].append(message.text.split()[1])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-            reply_markup.add('Cost: Ascending⬆', 'Cost: Descending⬇')
+            reply_markup.add('Cost: Ascending ⬆', 'Cost: Descending ⬇')
             bot.send_message(message.chat.id, 'Please select the sorting order:', reply_markup=reply_markup)
             bot.register_next_step_handler(message, present_options, args)
         except Exception as e:
@@ -94,9 +79,9 @@ def present_options(message, *args):
         cancel(message)
     else:
         try:
-            conn = sqlite3.connect('presents.db')
-            cursor = conn.cursor()
-            sort_order = message.text[:-1]
+            connect = sqlite3.connect('presents.db')
+            cur = connect.cursor()
+            sort_order = message.text[:-2]
             # Fetch present options from the database based on user selections
             query = "SELECT * FROM presents WHERE gender=? AND age_group=? AND occasion=?"
             params = (args[0][0][0][0], args[0][0][0][1], args[0][0][0][2])
@@ -105,13 +90,13 @@ def present_options(message, *args):
             else:
                 query += " ORDER BY cost DESC"
 
-            cursor.execute(query, params)
-            results = cursor.fetchall()
+            cur.execute(query, params)
+            results = cur.fetchall()
             # Generate response message with present options
             response = "Here are some present options:\n\n"
             for row in results:
                 print(row)
-                response += f"Name: {row[4]}\nCost: {row[6]}\n\n"
+                response += f"Name: {row[1]}\nCost: {row[2]}\n\n"
 
             bot.send_message(message.chat.id, response, reply_markup=types.ReplyKeyboardRemove())
         except Exception as e:
@@ -121,7 +106,7 @@ def present_options(message, *args):
 # Cancel command handler
 @bot.message_handler(commands=['cancel'])
 def cancel(message):
-    bot.send_message(message.chat.id, 'You have canceled the present selection.', reply_markup=types.ReplyKeyboardRemove())
+    bot.send_message(message.chat.id, CANCEL_MESSAGE, reply_markup=types.ReplyKeyboardRemove())
 
 
 # Main function to start the bot
