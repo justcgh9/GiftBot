@@ -90,12 +90,24 @@ def age_group(message, *args, db):
         try:
             args[0].append(message.text.split()[1])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+
+            a = ['0-7', '7-12', '12-18', '18-27', '27-45', '45+']
+
+            reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
+            if args[0][1] == '0-7':
+                if args[0][0] == 'Female':
+                    reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation', '🥂 Other')
+                elif args[0][0] == 'Male' or 'Other':
+                    reply_markup.row('🧑‍🎓 Graduation', '🥂 Other')
+            elif args[0][1] in ['7-12', '12-18']:
+
             if args[0][0] == 'Female':
-                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', "💐 Women's day")
-                reply_markup.row('🧑‍🎓 Graduation', '💍 Wedding', '❤ Anniversary', '🥂 Other')
+                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
+                reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation')
+                reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
             elif args[0][0] == 'Male':
                 reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
-                reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation')
+                reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation', '🥂 Other')
                 reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
             elif args[0][0] == 'Other':
                 reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
