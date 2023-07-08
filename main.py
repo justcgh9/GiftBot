@@ -45,8 +45,8 @@ def gift(message):
     """
     db = Database()
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    reply_markup.add('👩 Female', '👨 Male', 'Other')
-    bot.send_message(message.chat.id, 'Welcome to the Present Bot! Please select the gender:', reply_markup=reply_markup)
+    reply_markup.add('👩 Female', '👨 Male', '💅 Other')
+    bot.send_message(message.chat.id, 'Welcome to the Present Bot!Please select the gender:', reply_markup=reply_markup)
     bot.register_next_step_handler(message, gender, db)
 
 
@@ -109,7 +109,8 @@ def occasion(message, *args, db):
     It takes as input a message object and an optional list of arguments, which are used to store information about
     the user's preferences. It also takes as input a database connection object, which is used to query the database for
     restaurants that match these preferences. The function first checks if the user has chosen to cancel their search by
-    sending /cancel; if so, it calls on cancel() from bot_functions.py and returns None (see documentation for this function). If not, it tries appending an occasion type (
+    sending /cancel; if so, it calls on cancel() from bot_functions.py and returns None (see documentation for this function).
+    If not, it tries appending an occasion type ()
 
     :param message: Get the chat id of the user
     :param args: Pass a variable number of arguments to a function
@@ -120,7 +121,8 @@ def occasion(message, *args, db):
         cancel(message)
     else:
         try:
-            args[0][0].append(message.text.split()[1])
+            args[0][0].append(message.text[2:])
+            print(args[0][0])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.add('Cost: Ascending ⬆', 'Cost: Descending ⬇')
             bot.send_message(message.chat.id, 'Please select the sorting order:', reply_markup=reply_markup)
@@ -134,7 +136,7 @@ def present_options(message, *args, db):
     The present_options function is called when the user has selected a sorting option.
     It takes in the message object, which contains information about what was sent to the bot,
     and an arbitrary number of arguments (in this case only one), which are passed from
-    the previous function. The first argument is a tuple containing all of the parameters that were
+    the previous function. The first argument is a tuple containing all the parameters that were
     passed into select_query() in db_functions.py.
 
     :param message: Identify the user
