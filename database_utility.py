@@ -3,6 +3,56 @@ import sqlite3
 
 class Database:
     def __init__(self):
+        self.conn = sqlite3.connect('presents_alt.db')
+        self.cursor = self.conn.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents (
+                        present_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT,
+                        cost REAL
+                    )''')
+        self.conn.commit()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS gender (
+                                gender_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                gender TEXT
+                            )''')
+        self.conn.commit()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS age (
+                                age_group_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                age_group_name TEXT
+                            )''')
+        self.conn.commit()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS occasion (
+                                occasion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                occasion_name TEXT
+                            )''')
+        self.conn.commit()
+
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents_gender (
+                                present_id INTEGER,
+                                gender_id INTEGER,
+                                FOREIGN KEY (present_id) REFERENCES presents(present_id),
+                                FOREIGN KEY (gender_id) REFERENCES gender(gender_id),
+                                PRIMARY KEY(present_id,gender_id)
+                            )''')
+        self.conn.commit()
+
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents_age (
+                                present_id INTEGER,
+                                age_group_id INTEGER,
+                                FOREIGN KEY (present_id) REFERENCES presents(present_id),
+                                FOREIGN KEY (age_group_id) REFERENCES age(age_group_id),
+                                PRIMARY KEY(present_id,age_group_id)
+                            )''')
+        self.conn.commit()
+
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents_occasion (
+                                present_id INTEGER,
+                                occasion_id INTEGER,
+                                FOREIGN KEY (present_id) REFERENCES presents(present_id),
+                                FOREIGN KEY (occasion_id) REFERENCES occasion(occasion_id),
+                                PRIMARY KEY(present_id,occasion_id)
+                            )''')
+        self.conn.commit()
         """
         The __init__ function is called when the class is instantiated.
         It sets up the database connection and creates a table if it doesn't exist.
