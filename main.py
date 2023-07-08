@@ -8,7 +8,6 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def start(message):
-
     """
     The start function is the first function that will be called when a user
     starts interacting with the bot. It sends a welcome message to the user and
@@ -20,7 +19,6 @@ def start(message):
 
 
 def error(id):
-
     """
     The error function is called when the user enters an invalid command.
     It sends a message to the user explaining that they have entered an invalid command.
@@ -34,7 +32,6 @@ def error(id):
 # Gift command handler
 @bot.message_handler(commands=['gift'])
 def gift(message):
-
     """
     The gift function is the first function that gets called when a user starts interacting with the bot.
     It sends a welcome message and asks for gender input from the user. It then calls on gender() to handle
@@ -51,7 +48,6 @@ def gift(message):
 
 
 def gender(message, db):
-
     """
     The gender function is the first step in the process of creating a new user.
     It takes as input a message object and an SQLite database connection, and it
@@ -94,9 +90,17 @@ def age_group(message, *args, db):
         try:
             args[0].append(message.text.split()[1])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-            reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
-            reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
-            reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
+            if args[0][0] == 'Female':
+                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', "💐 Women's day")
+                reply_markup.row('🧑‍🎓 Graduation', '💍 Wedding', '❤ Anniversary', '🥂 Other')
+            elif args[0][0] == 'Male':
+                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
+                reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation')
+                reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
+            elif args[0][0] == 'Other':
+                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
+                reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
+                reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
             bot.send_message(message.chat.id, 'Please select the occasion:', reply_markup=reply_markup)
             bot.register_next_step_handler(message, occasion, args, db=db)
         except Exception as e:
@@ -121,7 +125,12 @@ def occasion(message, *args, db):
         cancel(message)
     else:
         try:
-            args[0][0].append(message.text[2:])
+            text_lst = message.text.split()
+            text = ''
+            for i in range(1, len(text_lst) - 1):
+                text += text_lst[i] + " "
+            text += text_lst[-1]
+            args[0][0].append(text)
             print(args[0][0])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.add('Cost: Ascending ⬆', 'Cost: Descending ⬇')
