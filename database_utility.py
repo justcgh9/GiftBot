@@ -84,10 +84,10 @@ class Database:
             answers[final_results_iter[0][0]] = final_results_iter[0][1]
         if sort_order == 'Cost: Ascending':
             for key, value in sorted(answers.items(), key=lambda x: x[1]):
-                self.response += key + " " + str(value) + "\n"
+                self.response += key + " " + str(int(value)) + "\n\n"
         elif sort_order == 'Cost: Descending':
             for key, value in sorted(answers.items(), key=lambda x: x[1], reverse=True):
-                self.response += key + " " + str(value) + "\n"
+                self.response += key + " " + str(int(value)) + "\n\n"
         else:
             self.response = MISTAKE_MESSAGE
 

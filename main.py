@@ -91,29 +91,48 @@ def age_group(message, *args, db):
             args[0].append(message.text.split()[1])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 
-            a = ['0-7', '7-12', '12-18', '18-27', '27-45', '45+']
-
-            reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
             if args[0][1] == '0-7':
+                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
                 if args[0][0] == 'Female':
                     reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation', '🥂 Other')
                 elif args[0][0] == 'Male' or 'Other':
                     reply_markup.row('🧑‍🎓 Graduation', '🥂 Other')
+                else:
+                    error(message.chat.id)
             elif args[0][1] in ['7-12', '12-18']:
+                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
                 if args[0][0] == 'Female':
+                    reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation')
+                    reply_markup.row('❤ Anniversary', '🥂 Other')
+                elif args[0][0] == 'Male':
+                    reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation')
+                    reply_markup.row('❤ Anniversary', '🥂 Other')
+                elif args[0][0] == 'Other':
+                    reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
+                    reply_markup.row('🧑‍🎓 Graduation', '❤ Anniversary', '🥂 Other')
+                else:
+                    error(message.chat.id)
+            elif args[0][1] in ['18-27', '27-45', '45+']:
+                if args[0][0] == "Female":
                     reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
                     reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation')
                     reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
-                elif args[0][0] == 'Male':
+                elif args[0][0] == "Male":
                     reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
-                    reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation', '🥂 Other')
+                    reply_markup.row('🧑‍🎓 Graduation', '🎖 Defender of the Fatherland day')
                     reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
                 elif args[0][0] == 'Other':
                     reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
                     reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
                     reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
+                else:
+                    error(message.chat.id)
+            else:
+                error(message.chat.id)
+
             bot.send_message(message.chat.id, 'Please select the occasion:', reply_markup=reply_markup)
             bot.register_next_step_handler(message, occasion, args, db=db)
+
         except Exception as e:
             error(message.chat.id)
 
@@ -142,7 +161,6 @@ def occasion(message, *args, db):
                 text += text_lst[i] + " "
             text += text_lst[-1]
             args[0][0].append(text)
-            print(args[0][0])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.add('Cost: Ascending ⬆', 'Cost: Descending ⬇')
             bot.send_message(message.chat.id, 'Please select the sorting order:', reply_markup=reply_markup)
