@@ -1,58 +1,33 @@
 import sqlite3
+from cfg import MISTAKE_MESSAGE
+
+age_groups = {
+    '0-7': 1,
+    '7-12': 2,
+    '12-18': 3,
+    '18-27': 4,
+    '27-45': 5,
+    '45+': 6
+}
+genders = {
+    'Male': 2,
+    'Female': 1,
+    'Other': 3
+}
+occasions = {
+    'Birthday': 1,
+    'Christmas': 2,
+    'Graduation': 3,
+    "Women's day": 4,
+    'Defender of the Fatherland day': 5,
+    'Wedding': 6,
+    'Anniversary': 7,
+    'Other': 8
+}
 
 
 class Database:
     def __init__(self):
-        self.conn = sqlite3.connect('presents_alt.db')
-        self.cursor = self.conn.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents (
-                        present_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT,
-                        cost REAL
-                    )''')
-        self.conn.commit()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS gender (
-                                gender_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                gender TEXT
-                            )''')
-        self.conn.commit()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS age (
-                                age_group_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                age_group_name TEXT
-                            )''')
-        self.conn.commit()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS occasion (
-                                occasion_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                occasion_name TEXT
-                            )''')
-        self.conn.commit()
-
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents_gender (
-                                present_id INTEGER,
-                                gender_id INTEGER,
-                                FOREIGN KEY (present_id) REFERENCES presents(present_id),
-                                FOREIGN KEY (gender_id) REFERENCES gender(gender_id),
-                                PRIMARY KEY(present_id,gender_id)
-                            )''')
-        self.conn.commit()
-
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents_age (
-                                present_id INTEGER,
-                                age_group_id INTEGER,
-                                FOREIGN KEY (present_id) REFERENCES presents(present_id),
-                                FOREIGN KEY (age_group_id) REFERENCES age(age_group_id),
-                                PRIMARY KEY(present_id,age_group_id)
-                            )''')
-        self.conn.commit()
-
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents_occasion (
-                                present_id INTEGER,
-                                occasion_id INTEGER,
-                                FOREIGN KEY (present_id) REFERENCES presents(present_id),
-                                FOREIGN KEY (occasion_id) REFERENCES occasion(occasion_id),
-                                PRIMARY KEY(present_id,occasion_id)
-                            )''')
-        self.conn.commit()
         """
         The __init__ function is called when the class is instantiated.
         It sets up the database connection and creates a table if it doesn't exist.
@@ -60,18 +35,9 @@ class Database:
         :param self: Reference the object itself
         :return: Nothing
         """
-        self.conn = sqlite3.connect('presents.db')
+        self.conn = sqlite3.connect('presents_new.db')
         self.cursor = self.conn.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS presents (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                cost REAL,
-                gender TEXT,
-                age_group TEXT,
-                occasion TEXT
-            )''')
         self.response = ''
-        self.conn.commit()
 
     def initialize_connection(self):
 
@@ -81,7 +47,7 @@ class Database:
         :param self: Represent the instance of the class
         :return: A connection and cursor to the database
         """
-        self.conn = sqlite3.connect('presents.db')
+        self.conn = sqlite3.connect('presents_new.db')
         self.cursor = self.conn.cursor()
 
     def select_query(self, sort_order, params):
@@ -96,18 +62,34 @@ class Database:
         :return: A list of tuples that represents bots response to the user
         """
         self.initialize_connection()
-        query = "SELECT * FROM presents WHERE gender=? AND age_group=? AND occasion=?"
-        if sort_order == 'Cost: Ascending':
-            query += " ORDER BY cost ASC"
-        else:
-            query += " ORDER BY cost DESC"
-
-        self.cursor.execute(query, params)
-        results = self.cursor.fetchall()
+        gender_id = genders[params[0]]
+        age_group_id = age_groups[params[1]]
+        occasion_id = occasions[params[2]]
+        query = f"SELECT present_id FROM presents_gender WHERE gender_id={gender_id}"
+        self.cursor.execute(query)
+        results_gender = self.cursor.fetchall()
+        query = f"SELECT present_id FROM presents_age WHERE age_group_id={age_group_id}"
+        self.cursor.execute(query)
+        results_age = self.cursor.fetchall()
+        query = f"SELECT present_id FROM presents_occasion WHERE occasion_id={occasion_id}"
+        self.cursor.execute(query)
+        results_occasion = self.cursor.fetchall()
+        results = list(set(results_occasion) & set(results_gender) & set(results_age))
         self.response = "Here are some present options:\n\n"
-        for row in results:
-            print(row)
-            self.response += f"Name: {row[1]}\nCost: {row[2]}\n\n"
+        answers = {}
+        for result in results:
+            query = f"SELECT name,cost FROM presents WHERE present_id={result[0]}"
+            self.cursor.execute(query)
+            final_results_iter = self.cursor.fetchall()
+            answers[final_results_iter[0][0]] = final_results_iter[0][1]
+        if sort_order == 'Cost: Ascending':
+            for key, value in sorted(answers.items(), key=lambda x: x[1]):
+                self.response += key + " " + str(value) + "\n"
+        elif sort_order == 'Cost: Descending':
+            for key, value in sorted(answers.items(), key=lambda x: x[1], reverse=True):
+                self.response += key + " " + str(value) + "\n"
+        else:
+            self.response = MISTAKE_MESSAGE
 
     def nullify_response(self):
         """

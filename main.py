@@ -100,19 +100,18 @@ def age_group(message, *args, db):
                 elif args[0][0] == 'Male' or 'Other':
                     reply_markup.row('🧑‍🎓 Graduation', '🥂 Other')
             elif args[0][1] in ['7-12', '12-18']:
-
-            if args[0][0] == 'Female':
-                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
-                reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation')
-                reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
-            elif args[0][0] == 'Male':
-                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
-                reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation', '🥂 Other')
-                reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
-            elif args[0][0] == 'Other':
-                reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
-                reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
-                reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
+                if args[0][0] == 'Female':
+                    reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
+                    reply_markup.row("💐 Women's day", '🧑‍🎓 Graduation')
+                    reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
+                elif args[0][0] == 'Male':
+                    reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
+                    reply_markup.row('🎖 Defender of the Fatherland day', '🧑‍🎓 Graduation', '🥂 Other')
+                    reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
+                elif args[0][0] == 'Other':
+                    reply_markup.row('🎂 Birthday', '🎄🎅 Christmas', '🧑‍🎓 Graduation')
+                    reply_markup.row("💐 Women's day", '🎖 Defender of the Fatherland day')
+                    reply_markup.row('💍 Wedding', '❤ Anniversary', '🥂 Other')
             bot.send_message(message.chat.id, 'Please select the occasion:', reply_markup=reply_markup)
             bot.register_next_step_handler(message, occasion, args, db=db)
         except Exception as e:
