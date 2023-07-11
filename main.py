@@ -218,7 +218,7 @@ def present_options(message, *args, db):
                 response = openai.Completion.create(
                     engine=cfg.MODEL_NAME,
                     prompt=input_text,
-                    max_tokens=100,
+                    max_tokens=200,
                     n=1,
                     stop=None,
                     temperature=0.7,
