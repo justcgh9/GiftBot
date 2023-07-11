@@ -10,10 +10,12 @@ MISTAKE_MESSAGE = u'Information is not in correct format or caused system proble
 
 BOT_TOKEN = '5897120145:AAEgh8bZr72solVQt3p405rUQod9Bz1-HWs'
 
-OPENAI_TOKEN = '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'
+OPENAI_TOKEN = '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'
 
 CANCEL_MESSAGE = u'You have canceled the current gift selection.\n' \
                  u'To choose present again, use command - /gift\n'
 
 HELP_MESSAGE = u'✔ To start, use command - /gift\n' \
                u'✖ To interrupt, use the command - /cancel'
+
+MODEL_NAME = 'text-davinci-003'

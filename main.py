@@ -1,9 +1,13 @@
+import openai
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+import cfg
 from cfg import WELCOME_MESSAGE, MISTAKE_MESSAGE, BOT_TOKEN, CANCEL_MESSAGE
 import telebot
 from database_utility import Database
 from telebot import types
 
 bot = telebot.TeleBot(BOT_TOKEN)
+openai.api_key = cfg.OPENAI_TOKEN
 
 
 @bot.message_handler(commands=['start'])
@@ -182,14 +186,48 @@ def present_options(message, *args, db):
     :param db: Pass the database object to the function
     :return: A tuple of three elements:
     """
+    presents = None
     if message.text == '/cancel':
         cancel(message)
     else:
         sort_order = message.text[:-2]
         params = (args[0][0][0][0], args[0][0][0][1], args[0][0][0][2])
-        db.select_query(sort_order, params)
+        presents = db.select_query(sort_order, params)
         bot.send_message(message.chat.id, db.response, reply_markup=types.ReplyKeyboardRemove())
         db.nullify_response()
+        markup = InlineKeyboardMarkup()
+        markup.row_width = 2
+        markup.add(InlineKeyboardButton("Yes", callback_data='yes'),
+                   InlineKeyboardButton("No", callback_data='no'))
+        bot.send_message(message.chat.id, 'Do you need further information?', reply_markup=markup)
+
+        @bot.callback_query_handler(func=lambda call: True)
+        def elaborate(call):
+            if call.data == 'yes':
+                reply_markup = InlineKeyboardMarkup(row_width=1)
+                for present in presents:
+                    reply_markup.add(InlineKeyboardButton(present, callback_data=present))
+                bot.send_message(message.chat.id, 'What present Idea do you want in details', reply_markup=reply_markup)
+            elif call.data == 'no':
+                pass
+            elif call.data in presents:
+                input_text = f'You are a Gifts assistant bot, that can help One ' \
+                             f'by describing a gift Idea in details. You should describe, how {call.data}' \
+                             f'  suit a person of gender {db.gender} and age {db.age} for {db.occasion}'
+                print(input_text)
+                response = openai.Completion.create(
+                    engine=cfg.MODEL_NAME,
+                    prompt=input_text,
+                    max_tokens=100,
+                    n=1,
+                    stop=None,
+                    temperature=0.7,
+                    top_p=1.0,
+                    frequency_penalty=0.0,
+                    presence_penalty=0.0
+                )
+                print('or here')
+                bot.send_message(message.chat.id, response.choices[0].text.strip())
 
 
 @bot.message_handler(commands=['cancel'])

@@ -38,6 +38,9 @@ class Database:
         self.conn = sqlite3.connect('presents_new.db')
         self.cursor = self.conn.cursor()
         self.response = ''
+        self.age = None
+        self.gender = None
+        self.occasion = None
 
     def initialize_connection(self):
 
@@ -62,6 +65,9 @@ class Database:
         :return: A list of tuples that represents bots response to the user
         """
         self.initialize_connection()
+        self.gender = params[0]
+        self.age = params[1]
+        self.occasion = params[2]
         gender_id = genders[params[0]]
         age_group_id = age_groups[params[1]]
         occasion_id = occasions[params[2]]
@@ -77,6 +83,7 @@ class Database:
         results = list(set(results_occasion) & set(results_gender) & set(results_age))
         self.response = "Here are some present options:\n\n"
         answers = {}
+        presents = []
         for result in results:
             query = f"SELECT name,cost FROM presents WHERE present_id={result[0]}"
             self.cursor.execute(query)
@@ -85,11 +92,16 @@ class Database:
         if sort_order == 'Cost: Ascending':
             for key, value in sorted(answers.items(), key=lambda x: x[1]):
                 self.response += key + " " + str(int(value)) + "\n\n"
+                presents.append(key)
+            return presents
         elif sort_order == 'Cost: Descending':
             for key, value in sorted(answers.items(), key=lambda x: x[1], reverse=True):
                 self.response += key + " " + str(int(value)) + "\n\n"
+                presents.append(key)
+            return presents
         else:
             self.response = MISTAKE_MESSAGE
+            return None
 
     def nullify_response(self):
         """
