@@ -10,6 +10,7 @@ from telebot import types
 bot = telebot.TeleBot(BOT_TOKEN)
 openai.api_key = cfg.OPENAI_TOKEN
 
+# These lists are for proper error handling
 age_groups = [
     '0-7',
     '7-12',
@@ -35,9 +36,16 @@ occasions = [
 ]
 
 
-
-
 def slice_string(text):
+
+    """
+    The slice_string function takes a string as input and returns the first sentence of that string.
+    The function searches for the first capital letter in the text, then finds the last full stop (period)
+    in that same text. It then slices out all characters between those two indices and returns them.
+
+    :param text: Pass in the text to be sliced
+    :return: The text between the first capital letter and the last full stop
+    """
     match = re.search('[A-Z]', text)  # Find the first capital letter
     if match:
         start_index = match.start()  # Get the index of the first capital letter
@@ -120,17 +128,17 @@ def gender(message, db):
 
 def age_group(message, *args, db):
     """
-    The age_group function is the second step in the process of selecting a gift.
-    It takes as input a message object and an array of arguments, which are passed on to
-    the next function. It also takes as input a database connection object, which is used
-    to store data about users' preferences for future use.
+    The age_group function is the second step in the process of finding a gift.
+    It takes as input a message from Telegram and an array of arguments, which are
+    the gender and age group selected by the user. It then checks if these values
+    are valid (i.e., they exist in our database) and sends back to the user a list
+    of possible occasions for which they might want to buy gifts.
 
     :param message: Get the message sent by the user
-    :param args: Pass a variable number of arguments to the function
+    :param args: Pass the arguments from one function to another
     :param db: Pass the database connection to the function
     :return: The age group of the recipient
     """
-
     if message.text == '/cancel':
         cancel(message)
     else:
@@ -187,17 +195,16 @@ def age_group(message, *args, db):
 
 def occasion(message, *args, db):
     """
-    The occasion function is the second step in the process of finding a restaurant.
-    It takes as input a message object and an optional list of arguments, which are used to store information about
-    the user's preferences. It also takes as input a database connection object, which is used to query the database for
-    restaurants that match these preferences. The function first checks if the user has chosen to cancel their search by
-    sending /cancel; if so, it calls on cancel() from bot_functions.py and returns None (see documentation for this function).
-    If not, it tries appending an occasion type ()
+    The occasion function is the second step in the process of selecting a gift.
+    It takes as input a message object and an args tuple, which contains all of the information that has been collected so far.
+    The function then checks if /cancel was entered by the user, and if it was, calls cancel(). Otherwise, it tries to add
+    the occasion to args[0][0]. If this fails (i.e., because there is no such occasion), error() is called; otherwise present_options()
+    is called with message and args as arguments.
 
     :param message: Get the chat id of the user
-    :param args: Pass a variable number of arguments to a function
-    :param db: Pass the database connection to the function
-    :return: The present options
+    :param args: Pass the list of arguments to the next function
+    :param db: Pass the database connection to the next function
+    :return: The present_options function
     """
     if message.text == '/cancel':
         cancel(message)
@@ -221,16 +228,16 @@ def occasion(message, *args, db):
 
 def present_options(message, *args, db):
     """
-    The present_options function is called when the user has selected a sorting option.
-    It takes in the message object, which contains information about what was sent to the bot,
-    and an arbitrary number of arguments (in this case only one), which are passed from
-    the previous function. The first argument is a tuple containing all the parameters that were
-    passed into select_query() in db_functions.py.
+        The present_options function is used to present the user with a list of gift options.
+        The function takes in a message object, and an arbitrary number of arguments (args).
+        It then checks if the text in the message is equal to '/cancel'. If it is, it calls
+        cancel(message) which will send a cancellation message back to the user. Otherwise,
+        it sorts through all of its arguments and finds out what kind of presents are available for that person.
 
-    :param message: Identify the user
-    :param args: Pass a tuple of arguments to the function
-    :param db: Pass the database object to the function
-    :return: A tuple of three elements:
+    :param message: Get the chat id of the user
+    :param args: Send a non-keyworded variable-length argument list to the function
+    :param db: Access the database
+    :return: The list of presents from the database
     """
     if message.text == '/cancel':
         cancel(message)
@@ -247,6 +254,16 @@ def present_options(message, *args, db):
 
         @bot.callback_query_handler(func=lambda call: True)
         def elaborate(call):
+            """
+                       The elaborate function is used to elaborate on a gift idea.
+                       It takes the call object as an argument and uses it to get the data from database.
+                       Then it calls OpenAI API with appropriate parameters, which returns a response object.
+                       The response object contains text of elaboration in its choices attribute, which is then sliced
+                       into three sentences and sent back to user.
+
+                   :param call: Get the data from the button that was pressed
+                   :return: A string, that is a description of the gift
+                   """
             try:
                 input_text = f'You are a Gifts assistant bot, that can help One ' \
                              f'by describing a gift Idea in details. You should describe {call.data} and' \
