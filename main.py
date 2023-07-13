@@ -1,4 +1,5 @@
 import openai
+import re
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import cfg
 from cfg import WELCOME_MESSAGE, MISTAKE_MESSAGE, BOT_TOKEN, CANCEL_MESSAGE
@@ -8,6 +9,45 @@ from telebot import types
 
 bot = telebot.TeleBot(BOT_TOKEN)
 openai.api_key = cfg.OPENAI_TOKEN
+
+age_groups = [
+    '0-7',
+    '7-12',
+    '12-18',
+    '18-27',
+    '27-45',
+    '45+'
+]
+genders = [
+    'Male',
+    'Female',
+    'Other'
+]
+occasions = [
+    'Birthday',
+    'Christmas',
+    'Graduation',
+    "Women's day",
+    'Defender of the Fatherland day',
+    'Wedding',
+    'Anniversary',
+    'Other'
+]
+
+
+
+
+def slice_string(text):
+    match = re.search('[A-Z]', text)  # Find the first capital letter
+    if match:
+        start_index = match.start()  # Get the index of the first capital letter
+        end_index = text.rfind('.')  # Find the index of the last full stop
+
+        if end_index > start_index:
+            sliced_text = text[start_index:end_index]  # Slice the text
+            return sliced_text
+
+    return None
 
 
 @bot.message_handler(commands=['start'])
@@ -48,6 +88,7 @@ def gift(message):
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     reply_markup.add('👩 Female', '👨 Male', '💅 Other')
     bot.send_message(message.chat.id, 'Welcome to the Present Bot!Please select the gender:', reply_markup=reply_markup)
+    db.nullify_response()
     bot.register_next_step_handler(message, gender, db)
 
 
@@ -66,6 +107,8 @@ def gender(message, db):
         cancel(message)
     else:
         try:
+            if message.text.split()[1] not in genders:
+                raise ValueError
             args = [message.text.split()[1]]
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.add('👶 0-7', '🧒 7-12', '👧👦 12-18', '🧑 18-27', '👩👨 27-45', '🧓 45+')
@@ -94,7 +137,8 @@ def age_group(message, *args, db):
         try:
             args[0].append(message.text.split()[1])
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-
+            if args[0][1] not in age_groups:
+                raise ValueError
             if args[0][1] == '0-7':
                 reply_markup.row('🎂 Birthday', '🎄🎅 Christmas')
                 if args[0][0] == 'Female':
@@ -164,6 +208,8 @@ def occasion(message, *args, db):
             for i in range(1, len(text_lst) - 1):
                 text += text_lst[i] + " "
             text += text_lst[-1]
+            if text not in occasions:
+                raise ValueError
             args[0][0].append(text)
             reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             reply_markup.add('Cost: Ascending ⬆', 'Cost: Descending ⬇')
@@ -186,34 +232,28 @@ def present_options(message, *args, db):
     :param db: Pass the database object to the function
     :return: A tuple of three elements:
     """
-    presents = None
     if message.text == '/cancel':
         cancel(message)
     else:
         sort_order = message.text[:-2]
         params = (args[0][0][0][0], args[0][0][0][1], args[0][0][0][2])
         presents = db.select_query(sort_order, params)
-        bot.send_message(message.chat.id, db.response, reply_markup=types.ReplyKeyboardRemove())
-        db.nullify_response()
-        markup = InlineKeyboardMarkup()
-        markup.row_width = 2
-        markup.add(InlineKeyboardButton("Yes", callback_data='yes'),
-                   InlineKeyboardButton("No", callback_data='no'))
-        bot.send_message(message.chat.id, 'Do you need further information?', reply_markup=markup)
+        print(presents)
+        reply_markup = InlineKeyboardMarkup(row_width=1)
+        for present, cost in presents:
+            reply_markup.add(InlineKeyboardButton(present + " " + str(cost) + "₽", callback_data=present))
+        resp = 'Here are some presents options.\nFor additional info click on the option you want'
+        bot.send_message(message.chat.id, resp, reply_markup=reply_markup)
 
         @bot.callback_query_handler(func=lambda call: True)
         def elaborate(call):
-            if call.data == 'yes':
-                reply_markup = InlineKeyboardMarkup(row_width=1)
-                for present in presents:
-                    reply_markup.add(InlineKeyboardButton(present, callback_data=present))
-                bot.send_message(message.chat.id, 'What present Idea do you want in details', reply_markup=reply_markup)
-            elif call.data == 'no':
-                pass
-            elif call.data in presents:
+            try:
                 input_text = f'You are a Gifts assistant bot, that can help One ' \
-                             f'by describing a gift Idea in details. You should describe, how {call.data}' \
-                             f'  suit a person of gender {db.gender} and age {db.age} for {db.occasion}'
+                             f'by describing a gift Idea in details. You should describe {call.data} and' \
+                             f'how it suits a person of gender {db.gender} and age {db.age} for {db.occasion}. ' \
+                             f'You should do it in three sentences. Mention key details of {call.data}, then ' \
+                             f'mention how it suits ' \
+                             f'this particular person. And in last sentence mention why it is good for {db.occasion}'
                 print(input_text)
                 response = openai.Completion.create(
                     engine=cfg.MODEL_NAME,
@@ -221,13 +261,15 @@ def present_options(message, *args, db):
                     max_tokens=200,
                     n=1,
                     stop=None,
-                    temperature=0.7,
+                    temperature=1.0,
                     top_p=1.0,
                     frequency_penalty=0.0,
                     presence_penalty=0.0
                 )
-                print('or here')
-                bot.send_message(message.chat.id, response.choices[0].text.strip())
+                print(presents)
+                bot.send_message(message.chat.id, slice_string(response.choices[0].text.strip()))
+            except Exception as e:
+                error(message.chat.id)
 
 
 @bot.message_handler(commands=['cancel'])
@@ -240,6 +282,11 @@ def cancel(message):
     :return: The cancel message
     """
     bot.send_message(message.chat.id, CANCEL_MESSAGE, reply_markup=types.ReplyKeyboardRemove())
+
+
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    error(message.chat.id)
 
 
 def main():

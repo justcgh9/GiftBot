@@ -10,7 +10,7 @@ MISTAKE_MESSAGE = u'Information is not in correct format or caused system proble
 
 BOT_TOKEN = '5897120145:AAEgh8bZr72solVQt3p405rUQod9Bz1-HWs'
 
-OPENAI_TOKEN = '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'
+OPENAI_TOKEN = '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'
 
 CANCEL_MESSAGE = u'You have canceled the current gift selection.\n' \
                  u'To choose present again, use command - /gift\n'

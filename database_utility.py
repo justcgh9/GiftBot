@@ -92,12 +92,12 @@ class Database:
         if sort_order == 'Cost: Ascending':
             for key, value in sorted(answers.items(), key=lambda x: x[1]):
                 self.response += key + " " + str(int(value)) + "\n\n"
-                presents.append(key)
+                presents.append([key, value])
             return presents
         elif sort_order == 'Cost: Descending':
             for key, value in sorted(answers.items(), key=lambda x: x[1], reverse=True):
                 self.response += key + " " + str(int(value)) + "\n\n"
-                presents.append(key)
+                presents.append([key, value])
             return presents
         else:
             self.response = MISTAKE_MESSAGE
@@ -113,3 +113,6 @@ class Database:
         :return: An empty string
         """
         self.response = ''
+        self.age = None
+        self.gender = None
+        self.occasion = None
