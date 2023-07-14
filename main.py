@@ -6,6 +6,9 @@ from cfg import WELCOME_MESSAGE, MISTAKE_MESSAGE, BOT_TOKEN, CANCEL_MESSAGE
 import telebot
 from database_utility import Database
 from telebot import types
+import sqlite3
+
+c = sqlite3.connect('presents_new.db')
 
 bot = telebot.TeleBot(BOT_TOKEN)
 openai.api_key = cfg.OPENAI_TOKEN
@@ -95,7 +98,7 @@ def gift(message):
     db = Database()
     reply_markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     reply_markup.add('👩 Female', '👨 Male', '💅 Other')
-    bot.send_message(message.chat.id, 'Welcome to the Present Bot!Please select the gender:', reply_markup=reply_markup)
+    bot.send_message(message.chat.id, 'Please select the gender:', reply_markup=reply_markup)
     db.nullify_response()
     bot.register_next_step_handler(message, gender, db)
 
@@ -264,15 +267,15 @@ def present_options(message, *args, db):
                    :param call: Get the data from the button that was pressed
                    :return: A string, that is a description of the gift
                    """
-            try:
-                input_text = f'You are a Gifts assistant bot, that can help One ' \
+            # try:
+            input_text = f'You are a Gifts assistant bot, that can help One ' \
                              f'by describing a gift Idea in details. You should describe {call.data} and' \
                              f'how it suits a person of gender {db.gender} and age {db.age} for {db.occasion}. ' \
                              f'You should do it in three sentences. Mention key details of {call.data}, then ' \
                              f'mention how it suits ' \
                              f'this particular person. And in last sentence mention why it is good for {db.occasion}'
-                print(input_text)
-                response = openai.Completion.create(
+            print(input_text)
+            response = openai.Completion.create(
                     engine=cfg.MODEL_NAME,
                     prompt=input_text,
                     max_tokens=200,
@@ -282,11 +285,11 @@ def present_options(message, *args, db):
                     top_p=1.0,
                     frequency_penalty=0.0,
                     presence_penalty=0.0
-                )
-                print(presents)
-                bot.send_message(message.chat.id, slice_string(response.choices[0].text.strip()))
-            except Exception as e:
-                error(message.chat.id)
+            )
+            print(presents)
+            bot.send_message(message.chat.id, slice_string(response.choices[0].text.strip()))
+            # except Exception as e:
+            #     error(message.chat.id)
 
 
 @bot.message_handler(commands=['cancel'])
