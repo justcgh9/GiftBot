@@ -53,11 +53,9 @@ def slice_string(text):
     if match:
         start_index = match.start()  # Get the index of the first capital letter
         end_index = text.rfind('.')  # Find the index of the last full stop
-
         if end_index > start_index:
             sliced_text = text[start_index:end_index]  # Slice the text
             return sliced_text
-
     return None
 
 

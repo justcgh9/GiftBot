@@ -4,13 +4,15 @@ import telebot
 bot = telebot.TeleBot('5897120145:AAEgh8bZr72solVQt3p405rUQod9Bz1-HWs')
 openai.api_key = "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"
 
-WELCOME_MESSAGE = u'Welcome to the Present Bot!\nThis bot will assist you to chose a present\n' \
-                  u'To start use command - /gift\n' \
-                  u'To abort use command - /cancel'
+WELCOME_MESSAGE = u'Welcome to the Gift Assistant Bot! 🎁\nThis bot will help you to choose a present for your ' \
+                  u'relatives and friends. Based on person characteristics, such as age, gender, interests, ' \
+                  u'and occasion information it will select the most appropriate gift options.\n' \ 
+                  u'✔ To start, use command - /gift\n' \
+                  u'✖ To interrupt, use the command - /cancel'
 
 
 # Initial prompt to fine-tune GPT
-INITIAL_PROMPT = """You are a gift assistant bot. I can help you choose a gift for someone.
+INITIAL_PROMPT = """I can help you choose a gift for someone.
 Please provide me with the following information:
 1. Gender of the person (male, female, other)
 2. Age of the person
