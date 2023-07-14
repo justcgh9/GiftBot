@@ -1,2 +1,3 @@
-Make the error handling in AI powered version
-Create a dataset for fine-tuning
+Fix the error handling
+Normalize DB
+Add more options to the database
