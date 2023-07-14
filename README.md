@@ -61,7 +61,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 [MIT](https://choosealicense.com/licenses/mit/) Lincence
 
-Copyright (c) 2023 SYAI
+Copyright (c) 2023 KSV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
